@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Anime Image</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            
+        }
+        .container {
+           
+            text-align: center;
+            padding: 50px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin: 20px auto; /* Adjust margin as needed */
+        }
+        select {
+            font-size: 16px;
+            padding: 8px;
+            margin-top: 10px;
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: #fff;
+            margin-top: 20px;
+        }
+        img {
+    border-radius: 8px;
+    margin-top: 20px;
+          height: 200px;
+  width: 100%;
+          margin-bottom: 200px;
+        }
+
+        .footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+        }
+        .footer a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .social-icons {
+            list-style-type: none;
+            padding: 0;
+        }
+        .social-icons li {
+            display: inline-block;
+            margin: 0 10px;
+        }
+        .social-icons li a {
+            color: #fff;
+            font-size: 20px;
+        }
+        .footer-text {
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>See what you like !</h1>
+    </header>
+    <div class="container"><br><br><br>
+        <label for="category">Choose a category or select "Random":</label>
+        <select id="category">
+            <option value="">Random</option>
+            <option value="waifu">Waifu</option>
+            <option value="neko">Neko</option>
+            <option value="shinobu">Shinobu</option>
+            <option value="megumin">Megumin</option>
+            <option value="bully">Bully</option>
+            <option value="cuddle">Cuddle</option>
+            <option value="cry">Cry</option>
+            <option value="hug">Hug</option>
+            <option value="awoo">Awoo</option>
+            <option value="kiss">Kiss</option>
+            <option value="lick">Lick</option>
+            <option value="pat">Pat</option>
+            <option value="smug">Smug</option>
+            <option value="bonk">Bonk</option>
+            <option value="yeet">Yeet</option>
+            <option value="blush">Blush</option>
+            <option value="smile">Smile</option>
+            <option value="wave">Wave</option>
+            <option value="highfive">Highfive</option>
+            <option value="handhold">Handhold</option>
+            <option value="nom">Nom</option>
+            <option value="bite">Bite</option>
+            <option value="glomp">Glomp</option>
+            <option value="slap">Slap</option>
+            <option value="kill">Kill</option>
+            <option value="kick">Kick</option>
+            <option value="happy">Happy</option>
+            <option value="wink">Wink</option>
+            <option value="poke">Poke</option>
+            <option value="dance">Dance</option>
+            <option value="cringe">Cringe</option>
+        </select>
+        <br><br>
+        <button class="button" onclick="getAnimeImage()">Load Image</button>
+        <h6>*Sometimes it takes few seconds</h6>
+
+        <img id="anime-image" src="" alt="Anime Image">
+      
+
+    </div>
+    <footer class="footer">
+        <ul class="social-icons">
+            <li><a href="https://youtube.com/@witnessgamingofficial?si=kHiPgL3f5Dom0XtA" class="icon-instagram"><span class="sr-only">Youtube</span></a></li>
+            <li><a href="https://api.whatsapp.com/send?phone=+919723649165&text=" class="icon-twitter"><span class="sr-only">WhatsApp</span></a></li>
+     </ul>
+        <p class="footer-text">Sk World &copy; 2024. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function getAnimeImage() {
+            const selectedCategory = document.getElementById('category').value;
+            let apiUrl = 'https://api.waifu.pics/sfw/';
+            
+            if (selectedCategory) {
+                apiUrl += selectedCategory;
+            } else {
+                const categories = [
+                    'waifu', 'neko', 'shinobu', 'megumin', 'bully', 
+                    'cuddle', 'cry', 'hug', 'awoo', 'kiss', 'lick', 
+                    'pat', 'smug', 'bonk', 'yeet', 'blush', 'smile', 
+                    'wave', 'highfive', 'handhold', 'nom', 'bite', 
+                    'glomp', 'slap', 'kill', 'kick', 'happy', 'wink', 
+                    'poke', 'dance', 'cringe'
+                ];
+                const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+                apiUrl += randomCategory;
+            }
+            
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.url) {
+                        document.getElementById('anime-image').src = data.url;
+                    } else {
+                        console.error('Image URL not found in response:', data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching the anime image:', error);
+                });
+        }
+    </script>
+</body>
+</html>
