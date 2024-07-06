@@ -23,16 +23,14 @@
             width: 100%;
             position: fixed;
             top: 0;
-            
         }
         .container {
-           
             text-align: center;
             padding: 50px;
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            margin: 20px auto; /* Adjust margin as needed */
+            margin: 100px auto;
         }
         select {
             font-size: 16px;
@@ -50,13 +48,16 @@
             margin-top: 20px;
         }
         img {
-    border-radius: 8px;
-    margin-top: 20px;
-          height: 200px;
-  width: 100%;
-          margin-bottom: 200px;
+            border-radius: 8px;
+            margin-top: 20px;
+            height: 200px;
+            width: 100%;
+            margin-bottom: 200px;
         }
-
+        .loading {
+            display: none;
+            margin-top: 20px;
+        }
         .footer {
             background-color: #333;
             color: #fff;
@@ -94,7 +95,7 @@
 </head>
 <body>
     <header>
-        <h1>See what you like !</h1>
+        <h1>See what you like!</h1>
     </header>
     <div class="container"><br><br><br>
         <label for="category">Choose a category or select "Random":</label>
@@ -134,20 +135,19 @@
         </select>
         <br><br>
         <button class="button" onclick="getAnimeImage()">Load Image</button>
-        <h6>*Sometimes it takes few seconds</h6>
-
+        <h6>*Sometimes it takes a few seconds</h6>
+        <h6>*Refresh the page if it takes more than one minute</h6>
+        <div class="loading">Loading...</div>
         <img id="anime-image" src="" alt="Anime Image">
-      
-
+        <a id="download-link" class="button" href="#" download style="display:none; margin-top: 20px;">Download Image</a>
     </div>
     <footer class="footer">
         <ul class="social-icons">
-            <li><a href="https://youtube.com/@witnessgamingofficial?si=kHiPgL3f5Dom0XtA" class="icon-instagram"><span class="sr-only">Youtube</span></a></li>
+            <li><a href="https://youtube.com/@witnessgamingofficial?si=kHiPgL3f5Dom0XtA" class="icon-instagram"><span class="sr-only">YouTube</span></a></li>
             <li><a href="https://api.whatsapp.com/send?phone=+919723649165&text=" class="icon-twitter"><span class="sr-only">WhatsApp</span></a></li>
-     </ul>
+        </ul>
         <p class="footer-text">Sk World &copy; 2024. All rights reserved.</p>
     </footer>
-
     <script>
         function getAnimeImage() {
             const selectedCategory = document.getElementById('category').value;
@@ -168,17 +168,40 @@
                 apiUrl += randomCategory;
             }
             
+            const loadingElement = document.querySelector('.loading');
+            const imageElement = document.getElementById('anime-image');
+            const downloadLink = document.getElementById('download-link');
+            
+            loadingElement.style.display = 'block';
+            imageElement.style.display = 'none';
+            downloadLink.style.display = 'none';
+            
             fetch(apiUrl)
                 .then(response => response.json())
                 .then(data => {
                     if (data.url) {
-                        document.getElementById('anime-image').src = data.url;
+                        const uniqueUrl = `${data.url}?t=${new Date().getTime()}`;
+                        const tempImage = new Image();
+                        tempImage.onload = () => {
+                            imageElement.src = uniqueUrl;
+                            imageElement.style.display = 'block';
+                            loadingElement.style.display = 'none';
+                            downloadLink.href = uniqueUrl;
+                            downloadLink.style.display = 'inline-block';
+                        };
+                        tempImage.onerror = () => {
+                            console.error('Failed to load image.');
+                            loadingElement.textContent = 'Failed to load image.';
+                        };
+                        tempImage.src = uniqueUrl; // Start loading the image
                     } else {
                         console.error('Image URL not found in response:', data);
+                        loadingElement.textContent = 'Failed to load image.';
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching the anime image:', error);
+                    loadingElement.textContent = 'Failed to load image.';
                 });
         }
     </script>
