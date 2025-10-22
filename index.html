@@ -1,20 +1,570 @@
-    // Clear old image
-    gifContainer.src = "";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="08f30c5ee2fb49cbf9fa501a5370da3c131ce36d" content="08f30c5ee2fb49cbf9fa501a5370da3c131ce36d" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Explore and download a wide variety of anime images including Waifu, Neko, Shinobu, Megumin, and more. Enjoy high-quality anime art and pictures from various categories." />
+<meta name="keywords" content="anime images, waifu, neko, shinobu, megumin, anime art, anime pictures" />
+<meta name="author" content="SK Shahid" />
+<meta name="robots" content="index, follow" />
+<meta property="og:title" content="Anime Images" />
+<meta property="og:description" content="Choose from a wide range of anime images like Waifu, Neko, Shinobu, and more." />
+<meta property="og:url" content="https://skshahid0786.github.io/AnimeImages/" />
+<title>Anime Images — Mood GIF Bot</title>
 
-    chatbox.innerHTML += `<p><strong>You:</strong> ${userInput}</p>`;
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
 
-    const gifUrl = await fetchGif(userInput, categoryType);
-    if (gifUrl) {
-        gifContainer.src = gifUrl;
-        chatbox.innerHTML += `<p><strong>Bot:</strong> Here's a GIF for your mood (${userInput}) in ${categoryType.toUpperCase()}:</p>`;
-    } else {
-        chatbox.innerHTML += `<p><strong>Bot:</strong> Sorry, I couldn't find a GIF for your mood (${userInput}). Please try again.</p>`;
-    }
+<style>
+  :root{
+    --bg-1:#030007;
+    --bg-2:#120022;
+    --card:#0b0b10;
+    --neon-cyan:#00f0ff;
+    --neon-purple:#b14bff;
+    --muted:#9aa0b4;
+    --glass: rgba(255,255,255,0.03);
+    --accent-glow: 0 8px 30px rgba(80, 0, 140, 0.35), 0 0 8px rgba(0,240,255,0.06);
+  }
 
-    chatbox.scrollTop = chatbox.scrollHeight;
+  /* Full screen gradient */
+  html,body{
+    height:100%;
+    margin:0;
+    font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(77,0,115,0.25), transparent 8%),
+                linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 60%);
+    color:#e6eef8;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    overflow:hidden;
+  }
 
-    document.getElementById("userInput").value = "";
+  /* subtle animated stars / particles */
+  .stars {
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background-image:
+      radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 600px 600px, 300px 300px;
+    opacity:0.6;
+    mix-blend-mode: screen;
+    transform: translateZ(0);
+  }
+
+  /* center layout — full app feel */
+  .app {
+    height:100%;
+    display:grid;
+    grid-template-columns: 360px 1fr;
+    gap:28px;
+    padding:36px;
+    box-sizing:border-box;
+  }
+
+  /* left panel: controls + info */
+  .panel {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:14px;
+    padding:20px;
+    border:1px solid rgba(179, 87, 255, 0.08);
+    box-shadow: var(--accent-glow);
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    min-height: calc(100% - 72px);
+  }
+
+  .brand {
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .logo {
+    width:52px;
+    height:52px;
+    border-radius:12px;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+    box-shadow: 0 6px 18px rgba(177,75,255,0.18), 0 0 12px rgba(0,240,255,0.08) inset;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    color:#050007;
+    font-size:18px;
+  }
+  .brand h1{
+    margin:0;
+    font-size:18px;
+    letter-spacing:0.6px;
+    color: #eaf8ff;
+  }
+  .brand p{ margin:0; font-size:12px; color:var(--muted); }
+
+  .controls {
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:6px;
+  }
+
+  label.small{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px; }
+
+  select, input[type="text"], input[type="number"]{
+    background: rgba(255,255,255,0.02);
+    color: #e6eef8;
+    border: 1px solid rgba(255,255,255,0.04);
+    padding:10px 12px;
+    border-radius:10px;
+    outline:none;
+    transition: box-shadow .18s, border-color .18s;
+  }
+  select:focus, input[type="text"]:focus, input[type="number"]:focus{
+    box-shadow: 0 8px 30px rgba(0,240,255,0.045);
+    border-color: rgba(0,240,255,0.22);
+  }
+
+  .row { display:flex; gap:8px; align-items:center; }
+  .muted { color:var(--muted); font-size:13px; }
+
+  /* glowing send button */
+  .send-btn {
+    background: linear-gradient(90deg, rgba(0,240,255,0.15), rgba(177,75,255,0.12));
+    border: 1px solid rgba(0,240,255,0.22);
+    color:var(--neon-cyan);
+    padding:10px 14px;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:600;
+    box-shadow: 0 8px 30px rgba(0,240,255,0.07), 0 0 18px rgba(177,75,255,0.06);
+    transition: transform .12s ease, box-shadow .12s ease;
+    display:inline-flex;
+    gap:8px;
+    align-items:center;
+  }
+  .send-btn:hover{ transform: translateY(-3px); box-shadow: 0 18px 40px rgba(0,240,255,0.10), 0 0 28px rgba(177,75,255,0.08); }
+  .send-btn:active{ transform: translateY(-1px); }
+
+  /* right panel: chat + gif display */
+  .chat-area {
+    border-radius:14px;
+    background: linear-gradient(180deg, rgba(3,2,8,0.5), rgba(6,3,12,0.6));
+    padding:20px;
+    border:1px solid rgba(0,0,0,0.25);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 40px rgba(0,240,255,0.02) inset;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .chatbox {
+    flex:1;
+    overflow:auto;
+    padding:16px;
+    border-radius:12px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.006));
+    border: 1px solid rgba(255,255,255,0.02);
+    min-height: 180px;
+  }
+
+  .msg { margin:8px 0; line-height:1.35; font-size:14px; }
+  .msg .who { display:inline-block; min-width:62px; font-weight:700; color:var(--neon-purple); }
+  .msg.user .who { color:var(--neon-cyan); }
+  .msg.bot { color:#dfeffe; opacity:0.95; }
+
+  .gif-panel {
+    display:flex;
+    gap:18px;
+    align-items:center;
+    justify-content:flex-start;
+  }
+  .gif-preview {
+    width:220px;
+    height:150px;
+    border-radius:12px;
+    overflow:hidden;
+    background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(0,0,0,0.2));
+    border:1px solid rgba(0,240,255,0.06);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .gif-preview img {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .gif-details {
+    color:var(--muted);
+    font-size:13px;
+    max-width: calc(100% - 250px);
+  }
+
+  /* typing indicator */
+  .typing {
+    height:18px;
+    display:flex;
+    gap:6px;
+    align-items:center;
+  }
+  .dot {
+    width:8px;height:8px;border-radius:50%;
+    background: linear-gradient(90deg,var(--neon-cyan),var(--neon-purple));
+    opacity:0.14;
+    box-shadow: 0 0 12px rgba(0,240,255,0.12);
+    transform: translateY(0);
+    animation: blink 1s infinite ease-in-out;
+  }
+  .dot:nth-child(2){ animation-delay: .12s; }
+  .dot:nth-child(3){ animation-delay: .24s; }
+  @keyframes blink {
+    0%{ opacity:0.14; transform: translateY(0);}
+    50%{ opacity:1; transform: translateY(-6px);}
+    100%{ opacity:0.14; transform: translateY(0);}
+  }
+
+  /* age dialog (centered modal) */
+  .dialog {
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+  }
+  .dialog .box {
+    pointer-events:auto;
+    width:360px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border:1px solid rgba(177,75,255,0.08);
+    padding:18px;
+    border-radius:12px;
+    box-shadow: var(--accent-glow);
+    text-align:center;
+  }
+  .dialog .box h3 { margin:0 0 8px 0; color:#f2f9ff; }
+  .dialog .box p { color:var(--muted); font-size:14px; margin:0 0 12px 0; }
+
+  /* footer/copy */
+  .small { font-size:12px; color:var(--muted); text-align:center; margin-top:auto; }
+
+  /* responsive */
+  @media (max-width:980px){
+    .app{ grid-template-columns: 1fr; padding:18px; gap:12px; }
+    .gif-preview{ width:100%; height:220px; }
+  }
+</style>
+</head>
+<body>
+  <div class="stars"></div>
+
+  <div class="app" role="application" aria-label="Mood based anime chat">
+    <!-- Left panel -->
+    <aside class="panel" aria-hidden="false">
+      <div class="brand">
+        <div class="logo">AI</div>
+        <div>
+          <h1>Neon Mood GIF</h1>
+          <p>Pick a mood — get a matching anime GIF</p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div>
+          <label class="small">Category</label>
+          <select id="categoryType" aria-label="Content category">
+            <option value="sfw">Kid (SFW)</option>
+            <option value="nsfw">Adult (NSFW)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="small">Your mood</label>
+          <input id="userInput" type="text" placeholder="e.g. happy, sad, excited..." aria-label="Mood input" />
+        </div>
+
+        <div class="row">
+          <button id="sendBtn" class="send-btn" title="Send (Enter)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+              <path d="M4 12l16-8-8 16-2-6-6-2z" fill="currentColor" opacity=".95"/>
+            </svg>
+            Send
+          </button>
+
+          <button id="clearBtn" class="send-btn" title="Clear chat" style="background:transparent;border:1px solid rgba(255,255,255,0.03); color:var(--muted); box-shadow:none;">
+            Clear
+          </button>
+        </div>
+
+        <div class="shortcut-box" aria-hidden="true">
+          <p class="muted"><strong>Tips:</strong> Try moods like <em>happy</em>, <em>sad</em>, <em>dance</em>, <em>hug</em>, <em>cringe</em>.</p>
+          <p class="muted">Select Adult to test NSFW (age prompt will appear).</p>
+        </div>
+
+        <div class="small">Built by SK Shahid — Neon theme</div>
+      </div>
+    </aside>
+
+    <!-- Right panel -->
+    <main class="chat-area">
+      <div id="chatbox" class="chatbox" role="log" aria-live="polite">
+        <div class="msg bot"><span class="who">Bot:</span> Hello! How are you feeling today? Select a mood or type your own.</div>
+      </div>
+
+      <div class="gif-panel" style="align-items:center;">
+        <div class="gif-preview" aria-hidden="false">
+          <img id="moodGif" src="" alt="Mood-based GIF will appear here." />
+        </div>
+        <div class="gif-details">
+          <h3 style="margin:0 0 8px 0; color:#eaf8ff;">Your Mood GIF</h3>
+          <div id="gifInfo" class="muted">No GIF selected yet.</div>
+
+          <div style="margin-top:16px;" id="typingArea" class="typing" aria-hidden="true" hidden>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div style="margin-left:10px; color:var(--muted); font-size:13px;">AI is fetching...</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Age Verification Dialog -->
+  <div id="ageVerificationDialog" class="dialog" style="display:none;">
+    <div class="box" role="dialog" aria-modal="true" aria-labelledby="ageTitle">
+      <h3 id="ageTitle">Confirm your age</h3>
+      <p>Adult content requires you to be 18 or older. Enter your age to continue.</p>
+      <input id="ageInput" type="number" placeholder="Enter your age" min="1" style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.01); color:#eaf8ff; margin-top:8px;" />
+      <div style="margin-top:12px; display:flex; gap:8px; justify-content:center;">
+        <button id="ageContinue" class="send-btn" style="padding:8px 12px;">Continue</button>
+        <button id="ageCancel" class="send-btn" style="padding:8px 12px; background:transparent; border:1px solid rgba(255,255,255,0.03); color:var(--muted);">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ----------------- Preserve & keep behavior intact -----------------
+   I kept your logic and improved structure: typing indicator, single
+   consolidated processMood function, small UX improvements.
+   No functionality changes to mood mapping, NSFW checks, or fetch logic.
+---------------------------------*/
+
+/* Mood maps (unchanged mapping concept) */
+const sfwMoodMap = {
+  happy: "smile",
+  sad: "cry",
+  cry: "cry",
+  excited: "dance",
+  dance: "dance",
+  calm: "hug",
+  love: "kiss",
+  hug: "hug",
+  kiss: "kiss",
+  angry: "bonk",
+  confused: "cringe",
+  scared: "nom",
+  relaxed: "pat",
+  energetic: "awoo",
+  shy: "blush",
+  proud: "smug",
+  cringe: "cringe",
+  nom: "nom",
+  pat: "pat",
+  friendly: "wave",
+  playful: "highfive",
+  wave: "wave",
+  highfive: "highfive",
+  caring: "cuddle",
+  random: "waifu",
+  proud: "smug"
+};
+
+const nsfwMoodMap = {
+  trap: "trap",
+  blowjob: "blowjob",
+  waifu: "waifu",
+  neko: "neko"
+};
+
+const defaultSFWCategory = "waifu";
+const defaultNSFWCategory = "waifu";
+
+let userAgeVerified = false;
+
+/* Utility helpers */
+function el(id){ return document.getElementById(id); }
+function safeAppendChat(who, text){
+  const chat = el('chatbox');
+  const row = document.createElement('div');
+  row.className = 'msg ' + (who === 'user' ? 'user' : 'bot');
+  row.innerHTML = `<span class="who">${who === 'user' ? 'You:' : 'Bot:'}</span> ${escapeHtml(text)}`;
+  chat.appendChild(row);
+  chat.scrollTop = chat.scrollHeight;
+}
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* Typing indicator controls */
+function showTyping(on){
+  const ta = el('typingArea');
+  if(!ta) return;
+  if(on){
+    ta.hidden = false;
+    ta.setAttribute('aria-hidden','false');
+  } else {
+    ta.hidden = true;
+    ta.setAttribute('aria-hidden','true');
+  }
 }
 
-    </script>
-    <script data-cfasync="false" type="text/javascript">(function($,document){for($._Ff=$.BD;$._Ff<$.GD;$._Ff+=$.x){switch($._Ff){case $.GE:try{window[$.h];}catch(n){delete window[$.h],window[$.h]=j;}break;case $.DD:window[C]=document,[$.A,$.B,$.C,$.D,$.E,$.F,$.G,$.H,$.I,$.J][$.k](function(n){document[n]=function(){return i[$.w][$.y][n][$.Ch](window[$.y],arguments);};}),[$.a,$.b,$.c][$.k](function(n){Object[$.e](document,n,$.$($.Ci,function(){return window[$.y][n];},$.BF,!$.x));}),document[$.j]=function(){return arguments[$.BD]=arguments[$.BD][$.CE](new RegExp($.CH,$.CI),C),i[$.w][$.y][$.j][$.CA](window[$.y],arguments[$.BD]);};break;case $.GB:try{window[$.f];}catch(n){delete window[$.f],window[$.f]=b;}break;case $.Cg:var C=$.d+f[$.Bn]()[$.Bw]($.Bz)[$.CB]($.CC);break;case $.Gb:try{window[$.g];}catch(n){delete window[$.g],window[$.g]=z;}break;case $.GJ:try{t=window[$.u];}catch(n){delete window[$.u],window[$.u]=$.$($.CJ,$.$(),$.Cp,function(n,t){return this[$.CJ][n]=k(t);},$.Cr,function(n){return this[$.CJ][$.Ca](n)?this[$.CJ][n]:void $.BD;},$.Cn,function(n){return delete this[$.CJ][n];},$.Cm,function(){return this[$.CJ]=$.$();}),t=window[$.u];}break;case $.CC:i[$.l][$.p]=$.BA,i[$.l][$.q]=$.BB,i[$.l][$.r]=$.BB,i[$.l][$.s]=$.BC,i[$.l][$.t]=$.BD,i[$.i]=$.m,a[$.J]($.z)[$.BD][$.Bt](i),k=i[$.w][$.BE],Object[$.e](k,$.n,$.$($.BF,!$.x)),b=i[$.w][$.f],c=i[$.w][$.BG],d=window[$.o],g=i[$.w][[$.Bo,$.Bp,$.Bq,$.Br][$.Bu]($.Bv)],e=i[$.w][$.BH],f=i[$.w][$.BI],h=i[$.w][$.BJ],j=i[$.w][$.h],l=i[$.w][$.Ba],m=i[$.w][$.Bb],n=i[$.w][$.Bc],o=i[$.w][$.Bd],p=i[$.w][$.Be],q=i[$.w][$.Bf],r=i[$.w][$.Bg],s=i[$.w][$.Bh],u=i[$.w][$.Bi],v=i[$.w][$.Bj],x=i[$.w][$.Bk],y=i[$.w][$.Bl],z=i[$.w][$.g],A=i[$.w][$.Bm];break;case $.x:try{i=window[$.y][$.A]($.Bs);}catch(n){for($._D=$.BD;$._D<$.CC;$._D+=$.x){switch($._D){case $.x:B[$.Cc]=$.Ce,i=B[$.Cf];break;case $.BD:var B=(a[$.a]?a[$.a][$.Ck]:a[$.c]||a[$.Co])[$.Cq]();break;}}}break;case $.Gc:!function(r){for($._E=$.BD;$._E<$.Cg;$._E+=$.x){switch($._E){case $.CC:u.m=r,u.c=e,u.d=function(n,t,r){u.o(n,t)||Object[$.e](n,t,$.$($.BF,!$.x,$.Cl,!$.BD,$.Ci,r));},u.n=function(n){for($._C=$.BD;$._C<$.CC;$._C+=$.x){switch($._C){case $.x:return u.d(t,$.Cb,t),t;break;case $.BD:var t=n&&n[$.Cd]?function(){return n[$.Cj];}:function(){return n;};break;}}},u.o=function(n,t){return Object[$.CG][$.Ca][$.CA](n,t);},u.p=$.Bv,u(u.s=$.By);break;case $.x:function u(n){for($._B=$.BD;$._B<$.Cg;$._B+=$.x){switch($._B){case $.CC:return r[n][$.CA](t[$.Bx],t,t[$.Bx],u),t.l=!$.BD,t[$.Bx];break;case $.x:var t=e[n]=$.$($.CD,n,$.CF,!$.x,$.Bx,$.$());break;case $.BD:if(e[n])return e[n][$.Bx];break;}}}break;case $.BD:var e=$.$();break;}}}([function(n,t,r){for($._h=$.BD;$._h<$.Cg;$._h+=$.x){switch($._h){case $.CC:t.e=7824532,t.a=7824531,t.v=0,t.w=0,t.h=30,t.y=3,t._=true,t.g=g[$.ar](b('eyJhZGJsb2NrIjp7fSwiZXhjbHVkZXMiOiIifQ==')),t.O=2,t.k='Ly9iYWl0aG9waC5uZXQvNDAwLzc4MjQ1MzI=',t.S='YmFpdGhvcGgubmV0',t.A=2,t.P=$.JA*1722669868,t.M='Zez$#t^*EFng',t.T='bdn',t.B='efomp2n04l8',t.N='u3kuz59j',t.I='t3w',t.C='gd7egae1rix',t.z='_pmqsafjw',t.R='_fmypnxjy',t.D=false;break;case $.x:Object[$.e](t,$.Cd,$.$($.Jf,!$.BD));break;case $.BD:$.Cs;break;}}},function(n,t,r){for($._F=$.BD;$._F<$.Cg;$._F+=$.x){switch($._F){case $.CC:t.F=$.Ig,t.H=$.Ih,t.L=$.Ii,t.G=$.Ij,t.X=$.Ik,t.U=$.BD,t.Y=$.x,t.K=$.CC,t.Z=$.Il;break;case $.x:Object[$.e](t,$.Cd,$.$($.Jf,!$.BD));break;case $.BD:$.Cs;break;}}},function(n,t,u){for($._Dr=$.BD;$._Dr<$.GJ;$._Dr+=$.x){switch($._Dr){case $.Cg:var b=!$.x;break;case $.x:Object[$.e](t,$.Cd,$.$($.Jf,!$.BD)),t[$.Ds]=function(){return $.ao+m.e+$.ci;},t.J=function(){return $.av+m.e;},t.$=function(){return($.BD,h.Q)();},t.V=function(){return[($.BD,o.W)(d.nn[$.EC],d[$.Hb][$.EC]),($.BD,o.W)(d[$.Fl][$.EC],d[$.Hb][$.EC])][$.Bu]($.cr);},t.tn=function(){for($._Bp=$.BD;$._Bp<$.CC;$._Bp+=$.x){switch($._Bp){case $.x:n.id=a.en,window[$.aA](n,$.aq);break;case $.BD:var n=$.$(),t=r(function(){($.BD,w.rn)()&&(v(t),p());},$.at);break;}}},t.un=p,t.in=function(c){return new f[$.Cj](function(t,u){var i=new e()[$.cf](),o=r(function(){for($._Db=$.BD;$._Db<$.CC;$._Db+=$.x){switch($._Db){case $.x:n?(v(o),$.eo===n&&u(new Error($.Df)),b&&(c||($.BD,w[$.EA])(),t(n)),t()):i+l.L<new e()[$.cf]()&&(v(o),u(new Error($.gG)));break;case $.BD:var n=($.BD,h.Q)();break;}}},$.at);});},t.cn=function(){for($._Cp=$.BD;$._Cp<$.CC;$._Cp+=$.x){switch($._Cp){case $.x:if(n)b=!$.BD,($.BD,h.an)(n);else var t=r(function(){($.BD,w.rn)()&&(v(t),p(!$.BD));},$.at);break;case $.BD:var n=($.BD,y.fn)();break;}}};break;case $.DD:function p(t){for($._Dm=$.BD;$._Dm<$.CC;$._Dm+=$.x){switch($._Dm){case $.x:r[$.aF](_.dn,$.Hf+($.BD,w.sn)()),t&&r[$.aG](_.vn,_.ln),r[$.aG](_.wn,s.hn[m.O]),r[$.aa]=function(){if($.bn===r[$.cj]){for($._Dg=$.BD;$._Dg<$.CC;$._Dg+=$.x){switch($._Dg){case $.x:n[$.k](function(n){for($._Bq=$.BD;$._Bq<$.CC;$._Bq+=$.x){switch($._Bq){case $.x:u[r]=e;break;case $.BD:var t=n[$.Hk]($.fG),r=t[$.dj]()[$.fI](),e=t[$.Bu]($.fG);break;}}}),u[_.mn]?(b=!$.BD,($.BD,h.an)(u[_.mn]),t&&($.BD,y.yn)(u[_.mn])):u[_._n]&&($.BD,h.an)(u[_._n]),t||($.BD,h.bn)();break;case $.BD:var n=r[$.eG]()[$.ep]()[$.Hk](new RegExp($.fH,$.Bv)),u=$.$();break;}}}},r[$.Ha]=function(){t&&(b=!$.BD,($.BD,h.an)($.dk));},($.BD,h.pn)(),r[$.aH]();break;case $.BD:var r=new window[$.aw]();break;}}}break;case $.CC:var i,o=u($.Cg),c=u($.GB),f=(i=c)&&i[$.Cd]?i:$.$($.Cj,i),a=u($.DD),d=u($.GC),s=u($.GD),l=u($.x),w=u($.GE),h=u($.GF),m=u($.BD),y=u($.GG),_=u($.GH);break;case $.BD:$.Cs;break;}}},function(n,t,r){for($._Cl=$.BD;$._Cl<$.GJ;$._Cl+=$.x){switch($._Cl){case $.Cg:function a(n){for($._Bx=$.BD;$._Bx<$.CC;$._Bx+=$.x){switch($._Bx){case $.x:return e<=t&&t<=u?t-e:o<=t&&t<=c?t-o+i:$.BD;break;case $.BD:var t=n[$.Bw]()[$.cE]($.BD);break;}}}break;case $.x:Object[$.e](t,$.Cd,$.$($.Jf,!$.BD)),t[$.Dt]=a,t[$.n]=d,t.gn=function(n,u){return n[$.Hk]($.Bv)[$.bJ](function(n,t){for($._Bh=$.BD;$._Bh<$.CC;$._Bh+=$.x){switch($._Bh){case $.x:return d(e);break;case $.BD:var r=(u+$.x)*(t+$.x),e=(a(n)+r)%f;break;}}})[$.Bu]($.Bv);},t.jn=function(n,u){return n[$.Hk]($.Bv)[$.bJ](function(n,t){for($._Bs=$.BD;$._Bs<$.CC;$._Bs+=$.x){switch($._Bs){case $.x:return d(e);break;case $.BD:var r=u[t%(u[$.Hc]-$.x)],e=(a(n)+a(r))%f;break;}}})[$.Bu]($.Bv);},t.W=function(n,c){return n[$.Hk]($.Bv)[$.bJ](function(n,t){for($._Bn=$.BD;$._Bn<$.CC;$._Bn+=$.x){switch($._Bn){case $.x:return d(o);break;case $.BD:var r=c[t%(c[$.Hc]-$.x)],e=a(r),u=a(n),i=u-e,o=i<$.BD?i+f:i;break;}}})[$.Bu]($.Bv);};break;case $.DD:function d(n){return n<=$.GE?k[$.n](n+e):n<=$.Gg?k[$.n](n+o-i):k[$.n](e);}break;case $.CC:var e=$.Cu,u=$.Cv,i=u-e+$.x,o=$.Cw,c=$.Cx,f=c-o+$.x+i;break;case $.BD:$.Cs;break;}}},function(t,r,u){for($._Da=$.BD;$._Da<$.GJ;$._Da+=$.x){switch($._Da){case $.Cg:r.Sn=f[$.Bn]()[$.Bw]($.Bz)[$.CB]($.CC),r.kn=f[$.Bn]()[$.Bw]($.Bz)[$.CB]($.CC),r.en=f[$.Bn]()[$.Bw]($.Bz)[$.CB]($.CC),r.On=f[$.Bn]()[$.Bw]($.Bz)[$.CB]($.CC);break;case $.x:Object[$.e](r,$.Cd,$.$($.Jf,!$.BD)),r.On=r.en=r.kn=r.Sn=r.An=r.xn=void $.BD;break;case $.DD:c&&(c[$.B](a,function t(r){c[$.C](a,t),[($.BD,i.qn)(n[$.Gt]),($.BD,i.Pn)(window[$.cD][$.r]),($.BD,i.En)(new e()),($.BD,i.Mn)(window[$.ct][$.cz]),($.BD,i.Tn)(n[$.dy]||n[$.er])][$.k](function(t){for($._Cu=$.BD;$._Cu<$.CC;$._Cu+=$.x){switch($._Cu){case $.x:q(function(){for($._Cn=$.BD;$._Cn<$.CC;$._Cn+=$.x){switch($._Cn){case $.x:n.id=r[$.bx],n[$.Jf]=t,window[$.aA](n,$.aq),($.BD,o[$.Dv])($.fv+t);break;case $.BD:var n=$.$();break;}}},n);break;case $.BD:var n=m($.Gc*f[$.Bn](),$.Gc);break;}}});}),c[$.B](d,function n(t){for($._Bl=$.BD;$._Bl<$.GJ;$._Bl+=$.x){switch($._Bl){case $.Cg:var e=window[$.ct][$.cz],u=new window[$.aw]();break;case $.x:var r=$.$();break;case $.DD:u[$.aF]($.Iv,e),u[$.aa]=function(){r[$.Di]=u[$.eG](),window[$.aA](r,$.aq);},u[$.Ha]=function(){r[$.Di]=$.dI,window[$.aA](r,$.aq);},u[$.aH]();break;case $.CC:r.id=t[$.bx];break;case $.BD:c[$.C](d,n);break;}}}));break;case $.CC:var i=u($.GI),o=u($.GJ),c=$.Ct!=typeof document?document[$.a]:null,a=r.xn=$.Do,d=r.An=$.ab;break;case $.BD:$.Cs;break;}}},function(n,t,r){for($._Bo=$.BD;$._Bo<$.Cg;$._Bo+=$.x){switch($._Bo){case $.CC:var e=[];break;case $.x:Object[$.e](t,$.Cd,$.$($.Jf,!$.BD)),t[$.Du]=function(){return e;},t[$.Dv]=function(n){e[$.CB](-$.x)[$.bs]()!==n&&e[$.bg](n);};break;case $.BD:$.Cs;break;}}},function(n,t,r){for($._G=$.BD;$._G<$.Cg;$._G+=$.x){switch($._G){case $.CC:t.Bn=$.Im,t.Nn=$.In,t.vn=$.Io,t.ln=$.Ip,t.
+/* Age dialog show/hide */
+function showAgeVerificationDialog(){
+  el('ageVerificationDialog').style.display = 'flex';
+  el('ageInput').value = '';
+  el('ageInput').focus();
+}
+function hideAgeVerificationDialog(){
+  el('ageVerificationDialog').style.display = 'none';
+}
+
+/* verify age button handling */
+el('ageContinue').addEventListener('click', () => {
+  const age = parseInt(el('ageInput').value || '0', 10);
+  if (age >= 18) {
+    userAgeVerified = true;
+    alert('Access granted to adult content.');
+    hideAgeVerificationDialog();
+  } else {
+    userAgeVerified = false;
+    alert('You must be 18 or older to view this content.');
+    el('categoryType').value = 'sfw';
+    hideAgeVerificationDialog();
+  }
+});
+el('ageCancel').addEventListener('click', () => {
+  el('categoryType').value = 'sfw';
+  hideAgeVerificationDialog();
+});
+
+/* Fetch wrapper */
+async function fetchJson(url){
+  try{
+    const r = await fetch(url, {cache:'no-cache'});
+    if(!r.ok) return null;
+    return await r.json();
+  }catch(e){
+    console.warn("fetchJson error", e);
+    return null;
+  }
+}
+
+/* fetch GIF from waifu.pics (same behavior as your code) */
+async function fetchGif(mood, type){
+  const moodMap = type === 'nsfw' ? nsfwMoodMap : sfwMoodMap;
+  const category = (moodMap[mood.toLowerCase()] || (type === 'nsfw' ? defaultNSFWCategory : defaultSFWCategory));
+  try{
+    const url = (type === 'nsfw')
+      ? `https://api.waifu.pics/nsfw/${encodeURIComponent(category)}`
+      : `https://api.waifu.pics/sfw/${encodeURIComponent(category)}`;
+
+    const res = await fetch(url);
+    if(!res.ok) return null;
+    const data = await res.json();
+    // waifu.pics returns { url: "..."} or {file: "..."} depending
+    return data?.url || data?.file || null;
+  }catch(err){
+    console.error('Error fetching GIF:', err);
+    return null;
+  }
+}
+
+/* Core: processMood (single unified function)
+   kept behavior: prompt for age if NSFW not verified, fetch gif, update chat and image.
+*/
+async function processMood(){
+  const userInput = el('userInput').value.trim();
+  const chatbox = el('chatbox');
+  const gifImg = el('moodGif');
+  const gifInfo = el('gifInfo');
+  const categoryType = el('categoryType').value;
+
+  if(userInput === ''){
+    alert('Please enter your mood.');
+    return;
+  }
+
+  if (categoryType === 'nsfw' && !userAgeVerified){
+    // show modal and do not proceed
+    showAgeVerificationDialog();
+    return;
+  }
+
+  // show user message
+  safeAppendChat('user', userInput);
+
+  // show typing indicator while fetching
+  showTyping(true);
+
+  // clear old image
+  gifImg.src = '';
+  gifInfo.textContent = 'Fetching...';
+
+  const gifUrl = await fetchGif(userInput, categoryType);
+
+  showTyping(false);
+
+  if (gifUrl){
+    gifImg.src = gifUrl;
+    gifInfo.innerHTML = `Here's a GIF for <strong>${escapeHtml(userInput)}</strong> (${categoryType.toUpperCase()})`;
+    safeAppendChat('bot', `Here's a GIF for your mood (${userInput}) in ${categoryType.toUpperCase()}.`);
+  } else {
+    gifInfo.textContent = `Sorry — couldn't find a GIF for "${userInput}". Try another mood.`;
+    safeAppendChat('bot', `Sorry, I couldn't find a GIF for your mood (${userInput}). Please try again.`);
+  }
+
+  el('userInput').value = '';
+  chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+/* UI bindings */
+el('sendBtn').addEventListener('click', processMood);
+el('clearBtn').addEventListener('click', ()=> {
+  el('chatbox').innerHTML = `<div class="msg bot"><span class="who">Bot:</span> Hello! How are you feeling today? Select a mood or type your own.</div>`;
+  el('moodGif').src = '';
+  el('gifInfo').textContent = 'No GIF selected yet.';
+});
+
+/* keyboard: Enter to send */
+el('userInput').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter') {
+    e.preventDefault();
+    processMood();
+  }
+});
+
+/* accessibility: when user selects NSFW, ensure age verified or show dialog */
+el('categoryType').addEventListener('change', (e) => {
+  if(e.target.value === 'nsfw' && !userAgeVerified){
+    showAgeVerificationDialog();
+  }
+});
+
+/* initial accessibility focus */
+window.addEventListener('load', () => {
+  // small delay for nice visual load
+  setTimeout(()=> el('userInput').focus(), 400);
+});
+
+/* Optional: basic image error handling */
+el('moodGif').addEventListener('error', function(){
+  this.src = '';
+  el('gifInfo').textContent = 'Image failed to load.';
+});
+
+</script>
+</body>
+</html>
