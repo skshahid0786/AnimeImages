@@ -618,3 +618,29 @@ addBubble("Hi — I'm NeoAssist. I'm listening with my eyes 🙂. Tell me how yo
 
 /* expose runChoice for option clicks */
 window.runChoice = runChoice;
+
+<script>
+document.getElementById('helpBtn').addEventListener('click', ()=>{
+  const chat = document.getElementById('chat');
+  const helpBubble = document.createElement('div');
+  helpBubble.classList.add('bubble','bot');
+  helpBubble.innerHTML = `
+    <strong>🧠 NeoAssist Commands:</strong><br><br>
+    🌦️ <b>Weather:</b> weather in [city]<br>
+    🕒 <b>Time:</b> say "time"<br>
+    💡 <b>Advice:</b> say "advice"<br>
+    😂 <b>Joke:</b> say "joke"<br>
+    💬 <b>Quote:</b> say "quote"<br>
+    🎲 <b>Fun:</b> roll a dice / flip a coin<br>
+    📚 <b>Search:</b> search [topic]<br>
+    🐱 <b>Images:</b> cat / dog<br>
+    🖼 <b>Anime:</b> click 🖼 button<br>
+    😄 <b>Mood change:</b> type how you feel (happy, sad, etc.)<br>
+    🧹 <b>Clear chat:</b> click Clear button
+  `;
+  chat.appendChild(helpBubble);
+  chat.scrollTop = chat.scrollHeight;
+});
+</script>
+
+
