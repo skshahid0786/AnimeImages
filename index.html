@@ -1,570 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="08f30c5ee2fb49cbf9fa501a5370da3c131ce36d" content="08f30c5ee2fb49cbf9fa501a5370da3c131ce36d" />
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="Explore and download a wide variety of anime images including Waifu, Neko, Shinobu, Megumin, and more. Enjoy high-quality anime art and pictures from various categories." />
-<meta name="keywords" content="anime images, waifu, neko, shinobu, megumin, anime art, anime pictures" />
-<meta name="author" content="SK Shahid" />
-<meta name="robots" content="index, follow" />
-<meta property="og:title" content="Anime Images" />
-<meta property="og:description" content="Choose from a wide range of anime images like Waifu, Neko, Shinobu, and more." />
-<meta property="og:url" content="https://skshahid0786.github.io/AnimeImages/" />
-<title>Anime Images — Mood GIF Bot</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AnimeFlareBox</title>
 
-<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
-  :root{
-    --bg-1:#030007;
-    --bg-2:#120022;
-    --card:#0b0b10;
-    --neon-cyan:#00f0ff;
-    --neon-purple:#b14bff;
-    --muted:#9aa0b4;
-    --glass: rgba(255,255,255,0.03);
-    --accent-glow: 0 8px 30px rgba(80, 0, 140, 0.35), 0 0 8px rgba(0,240,255,0.06);
-  }
+:root {
+  --bg: #f7f9fc;
+  --panel: #ffffff;
+  --accent: #ff6f61;
+  --accent-glow: rgba(255,111,97,0.4);
+  --muted: #e0f7fa;
+  --text: #1f2937;
+  --text-secondary: #6b7280;
+  --user-start: #d8b4fe;
+  --user-end: #a78bfa;
+}
 
-  /* Full screen gradient */
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{
+  height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Poppins',sans-serif;
+  display:flex;
+  justify-content:flex-start; /* aligned left */
+  align-items:center;
+  padding-left:60px; /* margin from left side */
+}
+
+/* --- Compact Layout --- */
+.app{
+  width:90%;
+  max-width:500px;
+  height:88vh;
+  background:var(--panel);
+  display:flex;
+  flex-direction:column;
+  border-radius:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.15);
+  overflow:hidden;
+  position:relative;
+  transition:all .3s ease;
+}
+
+/* Header */
+#girlContainer{
+  background:linear-gradient(90deg,rgba(255,111,97,0.1),rgba(255,111,97,0.05));
+  display:flex;
+  align-items:center;
+  padding:14px 16px;
+  gap:14px;
+  border-bottom:1px solid #f0f0f0;
+}
+#girlImage{
+  width:70px;
+  height:70px;
+  border-radius:12px;
+  object-fit:cover;
+  box-shadow:0 0 15px var(--accent-glow);
+  transition:transform .3s,filter .3s;
+}
+#girlImage:hover{transform:scale(1.05);filter:brightness(1.1);}
+#girlMeta{display:flex;flex-direction:column;}
+#girlName{font-weight:600;font-size:1.1rem;color:var(--text);}
+#girlMood{font-size:0.85rem;color:var(--text-secondary);margin-top:4px;}
+
+/* Chat area */
+#chat{
+  flex:1;
+  overflow-y:auto;
+  padding:16px 14px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  background:var(--bg);
+  scroll-behavior:smooth;
+}
+.bubble{
+  max-width:78%;
+  padding:10px 14px;
+  border-radius:14px;
+  word-wrap:break-word;
+  box-shadow:0 3px 10px rgba(0,0,0,0.1);
+  animation:fadeIn .25s ease;
+  line-height:1.45;
+}
+.bubble.user{
+  align-self:flex-end;
+  background:linear-gradient(90deg,var(--user-start),var(--user-end));
+  color:#fff;
+  border-bottom-right-radius:4px;
+}
+.bubble.bot{
+  align-self:flex-start;
+  background:var(--muted);
+  color:var(--text);
+  border-bottom-left-radius:4px;
+}
+.meta{font-size:0.7rem;color:var(--text-secondary);margin-top:4px;opacity:.85;}
+
+/* Input bar */
+#inputContainer{
+  display:flex;
+  gap:8px;
+  padding:12px;
+  border-top:1px solid #f0f0f0;
+  background:var(--panel);
+}
+#textInput{
+  flex:1;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid #d1d5db;
+  background:#f9fafb;
+  color:var(--text);
+  font-size:0.9rem;
+  outline:none;
+  transition:border-color .25s,box-shadow .25s;
+}
+#textInput:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px var(--accent-glow);
+}
+button{
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:500;
+  transition:background .25s,transform .25s;
+}
+#sendBtn{
+  background:var(--accent);
+  color:#fff;
+}
+#sendBtn:hover{
+  background:#e45b53;
+  transform:translateY(-1px);
+}
+#clearBtn{
+  background:#e5e7eb;
+  color:var(--text-secondary);
+}
+#clearBtn:hover{
+  background:#d1d5db;
+  transform:translateY(-1px);
+}
+
+/* Options */
+.option-box{
+  background:#f3f4f6;
+  border-radius:10px;
+  padding:10px;
+  border:1px solid #e5e7eb;
+  margin-top:8px;
+}
+.option{
+  padding:8px;
+  border-bottom:1px dashed #e5e7eb;
+  cursor:pointer;
+  transition:background .2s;
+}
+.option:hover{background:#f0f0f0;}
+.option:last-child{border-bottom:none;}
+
+/* Responsive */
+@media (max-width:600px){
   html,body{
-    height:100%;
-    margin:0;
-    font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    background: radial-gradient(1200px 600px at 10% 10%, rgba(77,0,115,0.25), transparent 8%),
-                linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 60%);
-    color:#e6eef8;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    overflow:hidden;
-  }
-
-  /* subtle animated stars / particles */
-  .stars {
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    background-image:
-      radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-      radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
-    background-size: 600px 600px, 300px 300px;
-    opacity:0.6;
-    mix-blend-mode: screen;
-    transform: translateZ(0);
-  }
-
-  /* center layout — full app feel */
-  .app {
-    height:100%;
-    display:grid;
-    grid-template-columns: 360px 1fr;
-    gap:28px;
-    padding:36px;
-    box-sizing:border-box;
-  }
-
-  /* left panel: controls + info */
-  .panel {
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border-radius:14px;
-    padding:20px;
-    border:1px solid rgba(179, 87, 255, 0.08);
-    box-shadow: var(--accent-glow);
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-    min-height: calc(100% - 72px);
-  }
-
-  .brand {
-    display:flex;
-    align-items:center;
-    gap:12px;
-  }
-  .logo {
-    width:52px;
-    height:52px;
-    border-radius:12px;
-    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
-    box-shadow: 0 6px 18px rgba(177,75,255,0.18), 0 0 12px rgba(0,240,255,0.08) inset;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:700;
-    color:#050007;
-    font-size:18px;
-  }
-  .brand h1{
-    margin:0;
-    font-size:18px;
-    letter-spacing:0.6px;
-    color: #eaf8ff;
-  }
-  .brand p{ margin:0; font-size:12px; color:var(--muted); }
-
-  .controls {
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    margin-top:6px;
-  }
-
-  label.small{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px; }
-
-  select, input[type="text"], input[type="number"]{
-    background: rgba(255,255,255,0.02);
-    color: #e6eef8;
-    border: 1px solid rgba(255,255,255,0.04);
-    padding:10px 12px;
-    border-radius:10px;
-    outline:none;
-    transition: box-shadow .18s, border-color .18s;
-  }
-  select:focus, input[type="text"]:focus, input[type="number"]:focus{
-    box-shadow: 0 8px 30px rgba(0,240,255,0.045);
-    border-color: rgba(0,240,255,0.22);
-  }
-
-  .row { display:flex; gap:8px; align-items:center; }
-  .muted { color:var(--muted); font-size:13px; }
-
-  /* glowing send button */
-  .send-btn {
-    background: linear-gradient(90deg, rgba(0,240,255,0.15), rgba(177,75,255,0.12));
-    border: 1px solid rgba(0,240,255,0.22);
-    color:var(--neon-cyan);
-    padding:10px 14px;
-    border-radius:12px;
-    cursor:pointer;
-    font-weight:600;
-    box-shadow: 0 8px 30px rgba(0,240,255,0.07), 0 0 18px rgba(177,75,255,0.06);
-    transition: transform .12s ease, box-shadow .12s ease;
-    display:inline-flex;
-    gap:8px;
-    align-items:center;
-  }
-  .send-btn:hover{ transform: translateY(-3px); box-shadow: 0 18px 40px rgba(0,240,255,0.10), 0 0 28px rgba(177,75,255,0.08); }
-  .send-btn:active{ transform: translateY(-1px); }
-
-  /* right panel: chat + gif display */
-  .chat-area {
-    border-radius:14px;
-    background: linear-gradient(180deg, rgba(3,2,8,0.5), rgba(6,3,12,0.6));
-    padding:20px;
-    border:1px solid rgba(0,0,0,0.25);
-    box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 40px rgba(0,240,255,0.02) inset;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-  }
-
-  .chatbox {
-    flex:1;
-    overflow:auto;
-    padding:16px;
-    border-radius:12px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.006));
-    border: 1px solid rgba(255,255,255,0.02);
-    min-height: 180px;
-  }
-
-  .msg { margin:8px 0; line-height:1.35; font-size:14px; }
-  .msg .who { display:inline-block; min-width:62px; font-weight:700; color:var(--neon-purple); }
-  .msg.user .who { color:var(--neon-cyan); }
-  .msg.bot { color:#dfeffe; opacity:0.95; }
-
-  .gif-panel {
-    display:flex;
-    gap:18px;
-    align-items:center;
-    justify-content:flex-start;
-  }
-  .gif-preview {
-    width:220px;
-    height:150px;
-    border-radius:12px;
-    overflow:hidden;
-    background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(0,0,0,0.2));
-    border:1px solid rgba(0,240,255,0.06);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-    display:flex;
-    align-items:center;
+    padding-left:0;
     justify-content:center;
   }
-  .gif-preview img {
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    display:block;
-  }
-  .gif-details {
-    color:var(--muted);
-    font-size:13px;
-    max-width: calc(100% - 250px);
-  }
+  .app{height:95vh;border-radius:0;max-width:100%;}
+  #girlImage{width:64px;height:64px;}
+  .bubble{max-width:88%;}
+}
 
-  /* typing indicator */
-  .typing {
-    height:18px;
-    display:flex;
-    gap:6px;
-    align-items:center;
-  }
-  .dot {
-    width:8px;height:8px;border-radius:50%;
-    background: linear-gradient(90deg,var(--neon-cyan),var(--neon-purple));
-    opacity:0.14;
-    box-shadow: 0 0 12px rgba(0,240,255,0.12);
-    transform: translateY(0);
-    animation: blink 1s infinite ease-in-out;
-  }
-  .dot:nth-child(2){ animation-delay: .12s; }
-  .dot:nth-child(3){ animation-delay: .24s; }
-  @keyframes blink {
-    0%{ opacity:0.14; transform: translateY(0);}
-    50%{ opacity:1; transform: translateY(-6px);}
-    100%{ opacity:0.14; transform: translateY(0);}
-  }
-
-  /* age dialog (centered modal) */
-  .dialog {
-    position:fixed;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    pointer-events:none;
-  }
-  .dialog .box {
-    pointer-events:auto;
-    width:360px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border:1px solid rgba(177,75,255,0.08);
-    padding:18px;
-    border-radius:12px;
-    box-shadow: var(--accent-glow);
-    text-align:center;
-  }
-  .dialog .box h3 { margin:0 0 8px 0; color:#f2f9ff; }
-  .dialog .box p { color:var(--muted); font-size:14px; margin:0 0 12px 0; }
-
-  /* footer/copy */
-  .small { font-size:12px; color:var(--muted); text-align:center; margin-top:auto; }
-
-  /* responsive */
-  @media (max-width:980px){
-    .app{ grid-template-columns: 1fr; padding:18px; gap:12px; }
-    .gif-preview{ width:100%; height:220px; }
-  }
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
 </style>
 </head>
+
 <body>
-  <div class="stars"></div>
-
-  <div class="app" role="application" aria-label="Mood based anime chat">
-    <!-- Left panel -->
-    <aside class="panel" aria-hidden="false">
-      <div class="brand">
-        <div class="logo">AI</div>
-        <div>
-          <h1>Neon Mood GIF</h1>
-          <p>Pick a mood — get a matching anime GIF</p>
-        </div>
+  <div class="app">
+    <div id="girlContainer">
+      <img id="girlImage" src="images/happy.jpg" alt="NeoAssist Avatar">
+      <div id="girlMeta">
+        <div id="girlName">NeoAssist</div>
+        <div id="girlMood">Feeling cheerful 💖</div>
       </div>
+    </div>
 
-      <div class="controls">
-        <div>
-          <label class="small">Category</label>
-          <select id="categoryType" aria-label="Content category">
-            <option value="sfw">Kid (SFW)</option>
-            <option value="nsfw">Adult (NSFW)</option>
-          </select>
-        </div>
+    <div id="chat" role="log" aria-live="polite"></div>
 
-        <div>
-          <label class="small">Your mood</label>
-          <input id="userInput" type="text" placeholder="e.g. happy, sad, excited..." aria-label="Mood input" />
-        </div>
-
-        <div class="row">
-          <button id="sendBtn" class="send-btn" title="Send (Enter)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
-              <path d="M4 12l16-8-8 16-2-6-6-2z" fill="currentColor" opacity=".95"/>
-            </svg>
-            Send
-          </button>
-
-          <button id="clearBtn" class="send-btn" title="Clear chat" style="background:transparent;border:1px solid rgba(255,255,255,0.03); color:var(--muted); box-shadow:none;">
-            Clear
-          </button>
-        </div>
-
-        <div class="shortcut-box" aria-hidden="true">
-          <p class="muted"><strong>Tips:</strong> Try moods like <em>happy</em>, <em>sad</em>, <em>dance</em>, <em>hug</em>, <em>cringe</em>.</p>
-          <p class="muted">Select Adult to test NSFW (age prompt will appear).</p>
-        </div>
-
-        <div class="small">Built by SK Shahid — Neon theme</div>
-      </div>
-    </aside>
-
-    <!-- Right panel -->
-    <main class="chat-area">
-      <div id="chatbox" class="chatbox" role="log" aria-live="polite">
-        <div class="msg bot"><span class="who">Bot:</span> Hello! How are you feeling today? Select a mood or type your own.</div>
-      </div>
-
-      <div class="gif-panel" style="align-items:center;">
-        <div class="gif-preview" aria-hidden="false">
-          <img id="moodGif" src="" alt="Mood-based GIF will appear here." />
-        </div>
-        <div class="gif-details">
-          <h3 style="margin:0 0 8px 0; color:#eaf8ff;">Your Mood GIF</h3>
-          <div id="gifInfo" class="muted">No GIF selected yet.</div>
-
-          <div style="margin-top:16px;" id="typingArea" class="typing" aria-hidden="true" hidden>
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div style="margin-left:10px; color:var(--muted); font-size:13px;">AI is fetching...</div>
-          </div>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- Age Verification Dialog -->
-  <div id="ageVerificationDialog" class="dialog" style="display:none;">
-    <div class="box" role="dialog" aria-modal="true" aria-labelledby="ageTitle">
-      <h3 id="ageTitle">Confirm your age</h3>
-      <p>Adult content requires you to be 18 or older. Enter your age to continue.</p>
-      <input id="ageInput" type="number" placeholder="Enter your age" min="1" style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.01); color:#eaf8ff; margin-top:8px;" />
-      <div style="margin-top:12px; display:flex; gap:8px; justify-content:center;">
-        <button id="ageContinue" class="send-btn" style="padding:8px 12px;">Continue</button>
-        <button id="ageCancel" class="send-btn" style="padding:8px 12px; background:transparent; border:1px solid rgba(255,255,255,0.03); color:var(--muted);">Cancel</button>
-      </div>
+    <div id="inputContainer">
+      <input id="textInput" type="text" placeholder="Type something... (try: joke, weather in Delhi, time)" />
+      <button id="sendBtn">Send</button>
+      <button id="clearBtn">Clear</button>
     </div>
   </div>
 
-<script>
-/* ----------------- Preserve & keep behavior intact -----------------
-   I kept your logic and improved structure: typing indicator, single
-   consolidated processMood function, small UX improvements.
-   No functionality changes to mood mapping, NSFW checks, or fetch logic.
----------------------------------*/
-
-/* Mood maps (unchanged mapping concept) */
-const sfwMoodMap = {
-  happy: "smile",
-  sad: "cry",
-  cry: "cry",
-  excited: "dance",
-  dance: "dance",
-  calm: "hug",
-  love: "kiss",
-  hug: "hug",
-  kiss: "kiss",
-  angry: "bonk",
-  confused: "cringe",
-  scared: "nom",
-  relaxed: "pat",
-  energetic: "awoo",
-  shy: "blush",
-  proud: "smug",
-  cringe: "cringe",
-  nom: "nom",
-  pat: "pat",
-  friendly: "wave",
-  playful: "highfive",
-  wave: "wave",
-  highfive: "highfive",
-  caring: "cuddle",
-  random: "waifu",
-  proud: "smug"
-};
-
-const nsfwMoodMap = {
-  trap: "trap",
-  blowjob: "blowjob",
-  waifu: "waifu",
-  neko: "neko"
-};
-
-const defaultSFWCategory = "waifu";
-const defaultNSFWCategory = "waifu";
-
-let userAgeVerified = false;
-
-/* Utility helpers */
-function el(id){ return document.getElementById(id); }
-function safeAppendChat(who, text){
-  const chat = el('chatbox');
-  const row = document.createElement('div');
-  row.className = 'msg ' + (who === 'user' ? 'user' : 'bot');
-  row.innerHTML = `<span class="who">${who === 'user' ? 'You:' : 'Bot:'}</span> ${escapeHtml(text)}`;
-  chat.appendChild(row);
-  chat.scrollTop = chat.scrollHeight;
-}
-function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-/* Typing indicator controls */
-function showTyping(on){
-  const ta = el('typingArea');
-  if(!ta) return;
-  if(on){
-    ta.hidden = false;
-    ta.setAttribute('aria-hidden','false');
-  } else {
-    ta.hidden = true;
-    ta.setAttribute('aria-hidden','true');
-  }
-}
-
-/* Age dialog show/hide */
-function showAgeVerificationDialog(){
-  el('ageVerificationDialog').style.display = 'flex';
-  el('ageInput').value = '';
-  el('ageInput').focus();
-}
-function hideAgeVerificationDialog(){
-  el('ageVerificationDialog').style.display = 'none';
-}
-
-/* verify age button handling */
-el('ageContinue').addEventListener('click', () => {
-  const age = parseInt(el('ageInput').value || '0', 10);
-  if (age >= 18) {
-    userAgeVerified = true;
-    alert('Access granted to adult content.');
-    hideAgeVerificationDialog();
-  } else {
-    userAgeVerified = false;
-    alert('You must be 18 or older to view this content.');
-    el('categoryType').value = 'sfw';
-    hideAgeVerificationDialog();
-  }
-});
-el('ageCancel').addEventListener('click', () => {
-  el('categoryType').value = 'sfw';
-  hideAgeVerificationDialog();
-});
-
-/* Fetch wrapper */
-async function fetchJson(url){
-  try{
-    const r = await fetch(url, {cache:'no-cache'});
-    if(!r.ok) return null;
-    return await r.json();
-  }catch(e){
-    console.warn("fetchJson error", e);
-    return null;
-  }
-}
-
-/* fetch GIF from waifu.pics (same behavior as your code) */
-async function fetchGif(mood, type){
-  const moodMap = type === 'nsfw' ? nsfwMoodMap : sfwMoodMap;
-  const category = (moodMap[mood.toLowerCase()] || (type === 'nsfw' ? defaultNSFWCategory : defaultSFWCategory));
-  try{
-    const url = (type === 'nsfw')
-      ? `https://api.waifu.pics/nsfw/${encodeURIComponent(category)}`
-      : `https://api.waifu.pics/sfw/${encodeURIComponent(category)}`;
-
-    const res = await fetch(url);
-    if(!res.ok) return null;
-    const data = await res.json();
-    // waifu.pics returns { url: "..."} or {file: "..."} depending
-    return data?.url || data?.file || null;
-  }catch(err){
-    console.error('Error fetching GIF:', err);
-    return null;
-  }
-}
-
-/* Core: processMood (single unified function)
-   kept behavior: prompt for age if NSFW not verified, fetch gif, update chat and image.
-*/
-async function processMood(){
-  const userInput = el('userInput').value.trim();
-  const chatbox = el('chatbox');
-  const gifImg = el('moodGif');
-  const gifInfo = el('gifInfo');
-  const categoryType = el('categoryType').value;
-
-  if(userInput === ''){
-    alert('Please enter your mood.');
-    return;
-  }
-
-  if (categoryType === 'nsfw' && !userAgeVerified){
-    // show modal and do not proceed
-    showAgeVerificationDialog();
-    return;
-  }
-
-  // show user message
-  safeAppendChat('user', userInput);
-
-  // show typing indicator while fetching
-  showTyping(true);
-
-  // clear old image
-  gifImg.src = '';
-  gifInfo.textContent = 'Fetching...';
-
-  const gifUrl = await fetchGif(userInput, categoryType);
-
-  showTyping(false);
-
-  if (gifUrl){
-    gifImg.src = gifUrl;
-    gifInfo.innerHTML = `Here's a GIF for <strong>${escapeHtml(userInput)}</strong> (${categoryType.toUpperCase()})`;
-    safeAppendChat('bot', `Here's a GIF for your mood (${userInput}) in ${categoryType.toUpperCase()}.`);
-  } else {
-    gifInfo.textContent = `Sorry — couldn't find a GIF for "${userInput}". Try another mood.`;
-    safeAppendChat('bot', `Sorry, I couldn't find a GIF for your mood (${userInput}). Please try again.`);
-  }
-
-  el('userInput').value = '';
-  chatbox.scrollTop = chatbox.scrollHeight;
-}
-
-/* UI bindings */
-el('sendBtn').addEventListener('click', processMood);
-el('clearBtn').addEventListener('click', ()=> {
-  el('chatbox').innerHTML = `<div class="msg bot"><span class="who">Bot:</span> Hello! How are you feeling today? Select a mood or type your own.</div>`;
-  el('moodGif').src = '';
-  el('gifInfo').textContent = 'No GIF selected yet.';
-});
-
-/* keyboard: Enter to send */
-el('userInput').addEventListener('keydown', (e) => {
-  if(e.key === 'Enter') {
-    e.preventDefault();
-    processMood();
-  }
-});
-
-/* accessibility: when user selects NSFW, ensure age verified or show dialog */
-el('categoryType').addEventListener('change', (e) => {
-  if(e.target.value === 'nsfw' && !userAgeVerified){
-    showAgeVerificationDialog();
-  }
-});
-
-/* initial accessibility focus */
-window.addEventListener('load', () => {
-  // small delay for nice visual load
-  setTimeout(()=> el('userInput').focus(), 400);
-});
-
-/* Optional: basic image error handling */
-el('moodGif').addEventListener('error', function(){
-  this.src = '';
-  el('gifInfo').textContent = 'Image failed to load.';
-});
-
-</script>
+  <script src="script.js"></script>
 </body>
 </html>
